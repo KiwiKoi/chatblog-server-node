@@ -27,9 +27,9 @@ const getPostById = (request, response) => {
 }
 
 const createPost = (request, response) => {
-    const {id, title, content} = request.body
+    const {id, title, content, image} = request.body
 
-    pool.query('INSERT INTO posts (id, title, content) VALUES ($1, $2, $3) RETURNING *', [id, title, content], (error, results) => {
+    pool.query('INSERT INTO posts (id, title, content, image) VALUES ($1, $2, $3, $4) RETURNING *', [id, title, content, image], (error, results) => {
         if (error) {
             throw error
         }
