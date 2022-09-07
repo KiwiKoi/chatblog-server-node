@@ -97,6 +97,51 @@ const deleteUser = (request, response) => {
   });
 };
 
+const getComments = (request, response) => {
+  pool.query("SELECT * FROM comments ORDER BY createdAt ASC", (error, results) => {
+    if (error) {
+      throw error;
+    }
+    response.status(200).json(results.rows);
+  });
+};
+
+const getCommentById = (request, response) => {
+  const commentID = parseInt(request.params.commentID);
+  pool.query("SELECT * FROM comments WHERE commentID = $1", [commentID], (error, results) => {
+    if (error) {
+      throw error;
+    }
+    response.status(200).json(results.rows);
+  });
+};
+
+const createComment = (request, response) => {
+  const { commentID, content, createdAt, updatedAt, user, post } = request.body;
+
+  pool.query(
+    "INSERT INTO comments (commentID, content, createdAt, updatedAt, user, post) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+    [commentID, content, createdAt, updatedAt, user, post],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      response.status(201).send(`comment added with commentID: ${results.rows[0].commentID}`);
+    }
+  );
+};
+
+const deleteComment = (request, response) => {
+  const commentID = parseInt(request.params.commentID);
+
+  pool.query("DELETE FROM comments WHERE id = $1", [commentID], (error, results) => {
+    if (error) {
+      throw error;
+    }
+    response.status(200).send(`comment deleted with commentID: ${commentID}`);
+  });
+};
+
 module.exports = {
   getPosts,
   getPostById,
@@ -106,4 +151,8 @@ module.exports = {
   getUserById,
   createUser,
   deleteUser,
+  getComments,
+  getCommentById,
+  createComment,
+  deleteComment,
 };

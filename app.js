@@ -25,6 +25,11 @@ app.get("/users/:id", db.getUserById);
 app.post("/users", db.createUser);
 app.delete("/users/:id", db.deleteUser);
 
+app.get("/comments", db.getComments);
+app.get("/comments/:id", db.getCommentById);
+app.post("/comments", db.createComment);
+app.delete("/comments/:id", db.deleteComment);
+
 app.listen(4000, function () {
   console.log(`Server is running port ${port}`);
 });
