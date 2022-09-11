@@ -1,4 +1,7 @@
 const Pool = require("pg").Pool;
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
+
 const pool = new Pool({
   user: "daniel",
   host: "localhost",
@@ -74,16 +77,21 @@ const getUserById = (request, response) => {
 const createUser = (request, response) => {
   const { id, username, firstname, lastname, email, password } = request.body;
 
-  pool.query(
-    "INSERT INTO users (id, username, firstname, lastname, email, password) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-    [id, username, firstname, lastname, email, password],
-    (error, results) => {
-      if (error) {
-        throw error;
-      }
-      response.status(201).send(`User added with ID: ${results.rows[0].id}`);
+  bcrypt.hash(password, saltRounds, (error, hash) => {
+    if (error) {
+      console.log(error);
     }
-  );
+    pool.query(
+      "INSERT INTO users (id, username, firstname, lastname, email, password) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+      [id, username, firstname, lastname, email, hash],
+      (error, results) => {
+        if (error) {
+          throw error;
+        }
+        response.status(201).send(`User added with ID: ${results.rows[0].id}`);
+      }
+    );
+  });
 };
 
 const deleteUser = (request, response) => {
@@ -98,22 +106,29 @@ const deleteUser = (request, response) => {
 };
 
 const getComments = (request, response) => {
-  pool.query("SELECT * FROM comments ORDER BY createdAt ASC", (error, results) => {
-    if (error) {
-      throw error;
+  pool.query(
+    "SELECT * FROM comments ORDER BY createdAt ASC",
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      response.status(200).json(results.rows);
     }
-    response.status(200).json(results.rows);
-  });
+  );
 };
 
 const getCommentById = (request, response) => {
   const commentID = parseInt(request.params.commentID);
-  pool.query("SELECT * FROM comments WHERE commentID = $1", [commentID], (error, results) => {
-    if (error) {
-      throw error;
+  pool.query(
+    "SELECT * FROM comments WHERE commentID = $1",
+    [commentID],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      response.status(200).json(results.rows);
     }
-    response.status(200).json(results.rows);
-  });
+  );
 };
 
 const createComment = (request, response) => {
@@ -126,7 +141,9 @@ const createComment = (request, response) => {
       if (error) {
         throw error;
       }
-      response.status(201).send(`comment added with commentID: ${results.rows[0].commentID}`);
+      response
+        .status(201)
+        .send(`comment added with commentID: ${results.rows[0].commentID}`);
     }
   );
 };
@@ -134,12 +151,44 @@ const createComment = (request, response) => {
 const deleteComment = (request, response) => {
   const commentID = parseInt(request.params.commentID);
 
-  pool.query("DELETE FROM comments WHERE id = $1", [commentID], (error, results) => {
-    if (error) {
-      throw error;
+  pool.query(
+    "DELETE FROM comments WHERE id = $1",
+    [commentID],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      response.status(200).send(`comment deleted with commentID: ${commentID}`);
     }
-    response.status(200).send(`comment deleted with commentID: ${commentID}`);
-  });
+  );
+};
+
+const login = (request, response) => {
+  const username = request.body.username;
+  const password = request.body.password;
+
+  pool.query(
+    `SELECT * FROM users WHERE username = $1`,
+    [username],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+
+      if (results.rows.length > 0) {
+        bcrypt.compare(password, results.rows[0].password, (error, res) => {
+          if (res) {
+            request.session.user = results.rows[0];
+            response.send(results.rows[0].username);
+          } else {
+            return response.send("Wrong username/password.");
+          }
+        });
+      } else {
+        return response.send("User doesn't exist.");
+      }
+    }
+  );
 };
 
 module.exports = {
@@ -155,4 +204,5 @@ module.exports = {
   getCommentById,
   createComment,
   deleteComment,
+  login,
 };
