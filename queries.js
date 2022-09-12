@@ -1,4 +1,5 @@
 const Pool = require("pg").Pool;
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
@@ -178,14 +179,28 @@ const login = (request, response) => {
       if (results.rows.length > 0) {
         bcrypt.compare(password, results.rows[0].password, (error, res) => {
           if (res) {
+            const id = results.rows[0].id;
+            const token = jwt.sign({ id }, "jwtSecret", { expiresIn: 300 });
+
             request.session.user = results.rows[0];
-            response.send(results.rows[0].username);
+
+            response.json({
+              auth: true,
+              token: token,
+              results: results.rows[0],
+            });
           } else {
-            return response.send("Wrong username/password.");
+            return response.json({
+              auth: false,
+              message: "Wrong username or password.",
+            });
           }
         });
       } else {
-        return response.send("User doesn't exist.");
+        return response.json({
+          auth: false,
+          message: "User doesn't exist.",
+        });
       }
     }
   );
