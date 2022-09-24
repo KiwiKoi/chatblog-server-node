@@ -26,7 +26,7 @@ const getPostById = (request, response) => {
     if (error) {
       throw error;
     }
-    response.status(200).json(results.rows);
+    response.status(200).json(results.rows[0]);
   });
 };
 
@@ -40,7 +40,7 @@ const createPost = (request, response) => {
       if (error) {
         throw error;
       }
-      response.status(201).send(`Post added with ID: ${results.rows[0].id}`);
+      response.status(201).json(`${results.rows[0].id}`);
     }
   );
 };
@@ -187,7 +187,7 @@ const login = (request, response) => {
             response.json({
               auth: true,
               token: token,
-              results: results.rows[0],
+              results: results.rows[0].id,
             });
           } else {
             return response.json({
@@ -219,5 +219,4 @@ module.exports = {
   getCommentById,
   createComment,
   deleteComment,
-  login,
-};
+  login};
