@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model Comment {
+  id        String    @id @unique @default(uuid()) @db.VarChar
+  content   String    @db.VarChar
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  // author   User   @relation(fields: [authorId], references: [id])
+  // authorId String @db.VarChar
+}
+
+model Post {
+  id        String    @id @unique @default(uuid()) @db.VarChar
+  title     String    @db.VarChar(50)
+  content   String    @db.VarChar
+  image     String?   @db.VarChar
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  published Boolean   @default(false)
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String   @db.VarChar
+}
+
+model User {
+  id        String @id @unique @default(uuid()) @db.VarChar
+  username  String @unique @db.VarChar
+  firstname String @db.VarChar
+  password  String @db.VarChar
+  email     String @unique @db.VarChar
+  lastname  String @db.VarChar
+  posts     Post[]
+  //  comments  Comment[]
+}
