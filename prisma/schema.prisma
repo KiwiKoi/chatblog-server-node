@@ -20,22 +20,22 @@ model Comment {
 model Post {
   id        String    @id @unique @default(uuid()) @db.VarChar
   title     String    @db.VarChar(50)
-  content   String    @db.VarChar
+  body      String    @db.VarChar
   image     String?   @db.VarChar
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
   published Boolean   @default(false)
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  String   @db.VarChar
+  // author    User     @relation(fields: [authorId], references: [id])
+  userID    String    @db.VarChar
 }
 
 model User {
-  id        String @id @unique @default(uuid()) @db.VarChar
-  username  String @unique @db.VarChar
-  firstname String @db.VarChar
+  id       String @id @unique @default(uuid()) @db.VarChar
+  username String @unique @db.VarChar
+  // firstname String @db.VarChar
   password  String @db.VarChar
-  email     String @unique @db.VarChar
-  lastname  String @db.VarChar
-  posts     Post[]
+  email    String @unique @db.VarChar
+  // lastname  String @db.VarChar
+  // posts     Post[]
   //  comments  Comment[]
 }

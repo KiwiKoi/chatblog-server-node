@@ -1,4 +1,5 @@
-const express = require("express");
+// const express = require("express");
+import express, { Request, Response } from "express";
 
 export const jwt = require("jsonwebtoken");
 import { Prisma, PrismaClient } from "@prisma/client";
@@ -15,22 +16,6 @@ const prisma = new PrismaClient();
 
 async function main() {
   // ... you will write your Prisma Client queries here
-  // await prisma.user.create({
-  //   data: {
-  //     username: "kiwi2",
-  //     firstname: "Daniel",
-  //     lastname: "Visage",
-  //     email: "test2@email.com",
-  //     password: "test",
-  //     posts: { 
-  //       create: [
-  //         {title: 'new post', content: 'new content'}
-  //       ]
-  //     }
-  //   },
-  // });
-  const allUsers = await prisma.user.findMany();
-  console.log(allUsers);
 }
 
 main()
@@ -42,6 +27,19 @@ main()
     await prisma.$disconnect();
     process.exit(1);
   });
+
+let authorized = true;
+
+function checkAuth(req: Request, res: Response, next: any) {
+  if (authorized) {
+    next();
+  } else {
+    res.status(403).send("Unauthorized!");
+    return;
+  }
+}
+
+app.use("/", checkAuth);
 
 app.use(
   cors()
@@ -65,7 +63,7 @@ app.use(
 );
 app.set("port", process.env.PORT || port);
 
-const verifyJWT = (req: any, res: any, next: any) => {
+const verifyJWT = (req: Request, res: Response, next: any) => {
   const token = req.headers["x-access-token"];
 
   if (!token) {
@@ -86,11 +84,7 @@ app.get("/isUserAuthenticated", verifyJWT, (response: any, request: any) => {
   response.send("You are authenticated.");
 });
 
-app.get("/", (request: any, response: any) => {
-  response.json({ info: "Node.js, Express, Postgres API" });
-});
-
-app.get("/login", (request: any, response: any) => {
+app.get("/login", (request: any, response: Response) => {
   if (request.session.user) {
     response.send({ loggedIn: true, user: request.session.user });
   } else {
@@ -98,14 +92,14 @@ app.get("/login", (request: any, response: any) => {
   }
 });
 
-app.get(`/posts`, async (req: any, res: any) => {
+app.get(`/posts`, async (req: Request, res: Response) => {
   const { searchString, skip, take, orderBy } = req.query;
 
   const or: Prisma.PostWhereInput = searchString
     ? {
         OR: [
           { title: { contains: searchString as string } },
-          { content: { contains: searchString as string } },
+          { body: { contains: searchString as string } },
         ],
       }
     : {};
@@ -117,7 +111,7 @@ app.get(`/posts`, async (req: any, res: any) => {
   res.json(posts);
 });
 
-app.get(`/posts/:id`, async (req: any, res: any) => {
+app.get(`/posts/:id`, async (req: Request, res: Response) => {
   const { id }: { id?: string } = req.params;
   const post = await prisma.post.findUnique({
     where: { id: String(id) },
@@ -125,15 +119,18 @@ app.get(`/posts/:id`, async (req: any, res: any) => {
   res.json(post);
 });
 
-app.post(`/posts`, async (req: any, res: any) => {
-  const { title, content, image, author } = req.body;
-  const result = await prisma.post.create({
-    data: { title, content, image, author },
+app.post(`/posts`, async (req: Request, res: Response) => {
+  const { title, body, image, userID, published, createdAt } =
+    req.body;
+  console.log(req.body);
+  const post = await prisma.post.create({
+    data: { title, body, image, createdAt, published, userID },
   });
-  res.json(result);
+  console.log(post);
+  res.json(post);
 });
 
-app.delete(`/posts/:id`, async (req: any, res: any) => {
+app.delete(`/posts/:id`, async (req: Request, res: Response) => {
   const { id } = req.params;
   const post = await prisma.post.delete({
     where: {
@@ -142,27 +139,47 @@ app.delete(`/posts/:id`, async (req: any, res: any) => {
   });
   res.json(post);
 });
-app.get("/users", async (req: any, res: any) => {
+
+app.put(`/posts/:id`, async (req: Request, res: Response) => {
+  const id = req.params.id;
+  const postData = req.body;
+  const post = await prisma.post.update({
+    where: { id: String(id) },
+    data: postData,
+  });
+
+  res.json(post);
+});
+
+app.get("/users", async (req: Request, res: Response) => {
   const users = await prisma.user.findMany();
   res.json(users);
 });
-
-app.get(`/users/:id`, async (req: any, res: any) => {
+app.get(`/users/:id`, async (req: Request, res: Response) => {
   const { id }: { id?: string } = req.params;
   const user = await prisma.user.findUnique({
     where: { id: String(id) },
   });
   res.json(user);
 });
-
-app.post(`/users`, async (req: any, res: any) => {
-  const { username, firstname, lastname, email, password } = req.body;
-  const result = await prisma.user.create({
-    data: { username, firstname, lastname, email, password },
+app.post(`/users`, async (req: Request, res: Response) => {
+  const {
+    username,
+    email,
+    password,
+    // firstname, lastname, password
+  } = req.body;
+  const user = await prisma.user.create({
+    data: {
+      username,
+      email,
+      password,
+      //   firstname, lastname, password
+    },
   });
-  res.json(result);
+  res.json(user);
 });
-app.delete(`/users/:id`, async (req: any, res: any) => {
+app.delete(`/users/:id`, async (req: Request, res: Response) => {
   const { id } = req.params;
   const user = await prisma.user.delete({
     where: {
@@ -171,26 +188,25 @@ app.delete(`/users/:id`, async (req: any, res: any) => {
   });
   res.json(user);
 });
-app.get("/comments", async (req: any, res: any) => {
+app.get("/comments", async (req: Request, res: Response) => {
   const comments = await prisma.comment.findMany();
   res.json(comments);
 });
-app.get(`/comments/:id`, async (req: any, res: any) => {
+app.get(`/comments/:id`, async (req: Request, res: Response) => {
   const { id }: { id?: string } = req.params;
   const comment = await prisma.comment.findUnique({
     where: { id: String(id) },
   });
   res.json(comment);
 });
-
-app.post(`/comments`, async (req: any, res: any) => {
+app.post(`/comments`, async (req: Request, res: Response) => {
   const { content, createdAt, updatedAt } = req.body;
   const result = await prisma.comment.create({
     data: { content, createdAt, updatedAt },
   });
   res.json(result);
 });
-app.delete(`/comments/:id`, async (req: any, res: any) => {
+app.delete(`/comments/:id`, async (req: Request, res: Response) => {
   const { id } = req.params;
   const comment = await prisma.comment.delete({
     where: {
@@ -202,6 +218,6 @@ app.delete(`/comments/:id`, async (req: any, res: any) => {
 
 // app.post("/login", db.login);
 
-app.listen(4000, function () {
+app.listen(port, function () {
   console.log(`Server is running port ${port}`);
 });
