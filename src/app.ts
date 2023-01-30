@@ -120,13 +120,11 @@ app.get(`/posts/:id`, async (req: Request, res: Response) => {
 });
 
 app.post(`/posts`, async (req: Request, res: Response) => {
-  const { title, body, image, userID, published, createdAt } =
-    req.body;
+  const { title, body, image, userID, published, createdAt } = req.body;
   console.log(req.body);
   const post = await prisma.post.create({
     data: { title, body, image, createdAt, published, userID },
   });
-  console.log(post);
   res.json(post);
 });
 
@@ -163,20 +161,24 @@ app.get(`/users/:id`, async (req: Request, res: Response) => {
   res.json(user);
 });
 app.post(`/users`, async (req: Request, res: Response) => {
-  const {
-    username,
-    email,
-    password,
-    // firstname, lastname, password
-  } = req.body;
+  const userData = req.body;
   const user = await prisma.user.create({
     data: {
-      username,
-      email,
-      password,
-      //   firstname, lastname, password
+      id: userData.uid,
+      email: userData.email,
     },
   });
+
+  res.json(user);
+});
+app.put(`/users/:id`, async (req: Request, res: Response) => {
+  const id = req.params.id;
+  const userData = req.body;
+  const user = await prisma.user.update({
+    where: { id: String(id) },
+    data: userData,
+  });
+
   res.json(user);
 });
 app.delete(`/users/:id`, async (req: Request, res: Response) => {
@@ -189,7 +191,11 @@ app.delete(`/users/:id`, async (req: Request, res: Response) => {
   res.json(user);
 });
 app.get("/comments", async (req: Request, res: Response) => {
-  const comments = await prisma.comment.findMany();
+  const { orderBy, postID } = req.query;
+  const comments = await prisma.comment.findMany({
+    orderBy: { createdAt: orderBy as Prisma.SortOrder },
+    where: { postID: String(postID) },
+  });
   res.json(comments);
 });
 app.get(`/comments/:id`, async (req: Request, res: Response) => {
@@ -199,13 +205,15 @@ app.get(`/comments/:id`, async (req: Request, res: Response) => {
   });
   res.json(comment);
 });
+
 app.post(`/comments`, async (req: Request, res: Response) => {
-  const { content, createdAt, updatedAt } = req.body;
+  const { body, createdAt, userID, postID } = req.body;
   const result = await prisma.comment.create({
-    data: { content, createdAt, updatedAt },
+    data: { body, createdAt, userID, postID },
   });
   res.json(result);
 });
+
 app.delete(`/comments/:id`, async (req: Request, res: Response) => {
   const { id } = req.params;
   const comment = await prisma.comment.delete({
@@ -215,8 +223,6 @@ app.delete(`/comments/:id`, async (req: Request, res: Response) => {
   });
   res.json(comment);
 });
-
-// app.post("/login", db.login);
 
 app.listen(port, function () {
   console.log(`Server is running port ${port}`);

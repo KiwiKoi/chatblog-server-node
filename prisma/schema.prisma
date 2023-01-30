@@ -10,11 +10,12 @@ datasource db {
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
 model Comment {
   id        String    @id @unique @default(uuid()) @db.VarChar
-  content   String    @db.VarChar
+  body   String    @db.VarChar
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
   // author   User   @relation(fields: [authorId], references: [id])
-  // authorId String @db.VarChar
+  userID String @db.VarChar
+  postID   String @db.VarChar
 }
 
 model Post {
@@ -30,12 +31,11 @@ model Post {
 }
 
 model User {
-  id       String @id @unique @default(uuid()) @db.VarChar
-  username String @unique @db.VarChar
-  // firstname String @db.VarChar
-  password  String @db.VarChar
-  email    String @unique @db.VarChar
-  // lastname  String @db.VarChar
+  id        String  @id @unique @default(uuid()) @db.VarChar
+  username  String?  @unique @db.VarChar
+  email     String  @unique @db.VarChar
+  firstname String? @db.VarChar
+  lastname  String? @db.VarChar
   // posts     Post[]
-  //  comments  Comment[]
+  // comments  Comment[]
 }
