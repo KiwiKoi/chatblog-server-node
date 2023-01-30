@@ -13,7 +13,7 @@ model Comment {
   body   String    @db.VarChar
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
-  // author   User   @relation(fields: [authorId], references: [id])
+  author   User   @relation(fields: [userID], references: [id])
   userID String @db.VarChar
   postID   String @db.VarChar
 }
@@ -26,7 +26,7 @@ model Post {
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
   published Boolean   @default(false)
-  // author    User     @relation(fields: [authorId], references: [id])
+  author    User     @relation(fields: [userID], references: [id])
   userID    String    @db.VarChar
 }
 
@@ -36,6 +36,6 @@ model User {
   email     String  @unique @db.VarChar
   firstname String? @db.VarChar
   lastname  String? @db.VarChar
-  // posts     Post[]
-  // comments  Comment[]
+  posts     Post[]
+  comments  Comment[]
 }

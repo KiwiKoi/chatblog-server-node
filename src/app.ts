@@ -8,7 +8,6 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const cors = require("cors");
-const db = require("./queries");
 const port = 4000;
 
 const app = express();
@@ -106,6 +105,7 @@ app.get(`/posts`, async (req: Request, res: Response) => {
 
   const posts = await prisma.post.findMany({
     orderBy: { updatedAt: orderBy as Prisma.SortOrder },
+    include: { author: true },
   });
 
   res.json(posts);
@@ -115,15 +115,22 @@ app.get(`/posts/:id`, async (req: Request, res: Response) => {
   const { id }: { id?: string } = req.params;
   const post = await prisma.post.findUnique({
     where: { id: String(id) },
+    include: { author: true },
   });
   res.json(post);
 });
 
 app.post(`/posts`, async (req: Request, res: Response) => {
-  const { title, body, image, userID, published, createdAt } = req.body;
+  const postData = req.body;
+  const userID = req.query.userID;
   console.log(req.body);
   const post = await prisma.post.create({
-    data: { title, body, image, createdAt, published, userID },
+    data: {
+      ...postData,
+      author: {
+        connect: { id: userID },
+      },
+    },
   });
   res.json(post);
 });
@@ -195,6 +202,7 @@ app.get("/comments", async (req: Request, res: Response) => {
   const comments = await prisma.comment.findMany({
     orderBy: { createdAt: orderBy as Prisma.SortOrder },
     where: { postID: String(postID) },
+    include: { author: true },
   });
   res.json(comments);
 });
@@ -202,6 +210,7 @@ app.get(`/comments/:id`, async (req: Request, res: Response) => {
   const { id }: { id?: string } = req.params;
   const comment = await prisma.comment.findUnique({
     where: { id: String(id) },
+    include: { author: true },
   });
   res.json(comment);
 });
