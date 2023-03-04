@@ -39,3 +39,8 @@ model User {
   posts     Post[]
   comments  Comment[]
 }
+
+model Message {
+  id String @id @unique @default(uuid()) @db.VarChar
+  body String @db.VarChar
+}
