@@ -10,12 +10,14 @@ datasource db {
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
 model Comment {
   id        String    @id @unique @default(uuid()) @db.VarChar
-  body   String    @db.VarChar
+  body      String    @db.VarChar
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
-  author   User   @relation(fields: [userID], references: [id])
-  userID String @db.VarChar
-  postID   String @db.VarChar
+  author    User      @relation(fields: [userID], references: [id])
+  userID    String    @db.VarChar
+  postID    String    @db.VarChar
+
+  @@map("comments")
 }
 
 model Post {
@@ -26,16 +28,20 @@ model Post {
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
   published Boolean   @default(false)
-  author    User     @relation(fields: [userID], references: [id])
+  author    User      @relation(fields: [userID], references: [id])
   userID    String    @db.VarChar
+
+  @@map("posts")
 }
 
 model User {
-  id        String  @id @unique @default(uuid()) @db.VarChar
-  username  String?  @unique @db.VarChar
-  email     String  @unique @db.VarChar
-  firstname String? @db.VarChar
-  lastname  String? @db.VarChar
+  id        String    @id @unique @default(uuid()) @db.VarChar
+  username  String?   @unique @db.VarChar
+  email     String    @unique @db.VarChar
+  firstname String?   @db.VarChar
+  lastname  String?   @db.VarChar
   posts     Post[]
   comments  Comment[]
+
+  @@map("users")
 }
