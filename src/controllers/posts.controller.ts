@@ -15,7 +15,7 @@ export function getPosts() {
       : {};
 
     const posts = await prisma.post.findMany({
-      orderBy: { updatedAt: orderBy as Prisma.SortOrder },
+      orderBy: { updated_at: orderBy as Prisma.SortOrder },
       include: { author: true },
     });
 
@@ -37,13 +37,13 @@ export function getPostById() {
 export function createPost() {
   return async (req: Request, res: Response) => {
     const postData = req.body;
-    const userID = req.query.userID;
-    console.log(req.body);
+    const authorId = req.query.authorId;
+    console.log(postData)
     const post = await prisma.post.create({
       data: {
         ...postData,
         author: {
-          connect: { id: userID },
+          connect: { id: authorId },
         },
       },
     });

@@ -1,14 +1,13 @@
-import { Prisma, PrismaClient } from '@prisma/client';
-import express, { Request, Response } from 'express';
+import { Prisma, PrismaClient } from "@prisma/client";
+import { Request, Response } from "express";
 
-const app = express();
 const prisma = new PrismaClient();
 
 export function getComments() {
   return async (req: Request, res: Response) => {
     const { orderBy, postID } = req.query;
     const comments = await prisma.comment.findMany({
-      orderBy: { createdAt: orderBy as Prisma.SortOrder },
+      orderBy: { created_at: orderBy as Prisma.SortOrder },
       where: { postID: String(postID) },
       include: { author: true },
     });
@@ -29,9 +28,10 @@ export function getCommentById() {
 
 export function createComment() {
   return async (req: Request, res: Response) => {
-    const { body, createdAt, userID, postID } = req.body;
+    const { body, created_at, userID, postID } = req.body;
+
     const result = await prisma.comment.create({
-      data: { body, createdAt, userID, postID },
+      data: { body, created_at, userID, postID },
     });
     res.json(result);
   };
