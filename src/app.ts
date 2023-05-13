@@ -15,7 +15,9 @@ const port = 4000;
 const app = express();
 const server = http.createServer(app);
 const prisma = new PrismaClient();
-
+const io = require('socket.io')(server, {
+  cors: {origin : '*'}
+});
 async function main() {
   // ... you will write your Prisma Client queries here
 }
@@ -42,6 +44,19 @@ function checkAuth(req: Request, res: Response, next: any) {
     return;
   }
 }
+
+io.on('connection', (socket:any) => {
+  console.log('a user connected');
+
+  socket.on('message', (message:any) => {
+    console.log(message);
+    io.emit('message', `${socket.id.substr(0, 2)} said ${message}`);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('a user disconnected!');
+  });
+});
 
 app.use('/', checkAuth);
 
