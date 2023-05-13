@@ -50,7 +50,7 @@ io.on('connection', (socket:any) => {
 
   socket.on('message', (message:any) => {
     console.log(message);
-    io.emit('message', `${socket.id.substr(0, 2)} said ${message}`);
+    io.emit('message', message);
   });
 
   socket.on('disconnect', () => {
