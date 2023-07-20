@@ -37,8 +37,7 @@ export function getPostById() {
 export function createPost() {
   return async (req: Request, res: Response) => {
     const postData = req.body;
-    const authorId = req.query.authorId;
-    console.log(postData)
+    const authorId = req.query.userID;
     const post = await prisma.post.create({
       data: {
         ...postData,
