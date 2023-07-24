@@ -1,7 +1,6 @@
-import { Prisma, PrismaClient } from '@prisma/client';
-import express, { Request, Response } from 'express';
+import { Prisma, PrismaClient } from "@prisma/client";
+import { Request, Response } from "express";
 
-const app = express();
 const prisma = new PrismaClient();
 
 export function getPosts() {
@@ -10,7 +9,10 @@ export function getPosts() {
 
     const or: Prisma.PostWhereInput = searchString
       ? {
-          OR: [{ title: { contains: searchString as string } }, { body: { contains: searchString as string } }],
+          OR: [
+            { title: { contains: searchString as string } },
+            { body: { contains: searchString as string } },
+          ],
         }
       : {};
 
@@ -18,7 +20,6 @@ export function getPosts() {
       orderBy: { updated_at: orderBy as Prisma.SortOrder },
       include: { author: true },
     });
-
     res.json(posts);
   };
 }
@@ -38,6 +39,8 @@ export function createPost() {
   return async (req: Request, res: Response) => {
     const postData = req.body;
     const authorId = req.query.userID;
+
+    console.log(req.params);
     const post = await prisma.post.create({
       data: {
         ...postData,

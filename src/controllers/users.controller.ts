@@ -1,5 +1,5 @@
-import { Prisma, PrismaClient } from '@prisma/client';
-import express, { Request, Response } from 'express';
+import { Prisma, PrismaClient } from "@prisma/client";
+import express, { Request, Response } from "express";
 
 const app = express();
 const prisma = new PrismaClient();
@@ -12,6 +12,17 @@ export function getUsers() {
 }
 
 export function getUserById() {
+  return async (req: Request, res: Response) => {
+    const { id }: { id?: string } = req.params;
+    const user = await prisma.user.findUnique({
+      where: { id: String(id) },
+      include: { posts: true },
+    });
+    res.json(user);
+  };
+}
+
+export function getUserPosts() {
   return async (req: Request, res: Response) => {
     const { id }: { id?: string } = req.params;
     const user = await prisma.user.findUnique({
