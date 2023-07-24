@@ -9,39 +9,69 @@ datasource db {
 
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
 model Comment {
-  id        String    @id @unique @default(uuid()) @db.VarChar
-  body      String    @db.VarChar
+  id         String    @id @unique @default(uuid()) @db.VarChar
+  body       String    @db.VarChar
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
-  author    User      @relation(fields: [userID], references: [id])
-  userID    String    @db.VarChar
-  postID    String    @db.VarChar
+  author     User      @relation(fields: [userID], references: [id])
+  userID     String    @db.VarChar
+  postID     String    @db.VarChar
 
   @@map("comments")
 }
 
 model Post {
-  id        String    @id @unique @default(uuid()) @db.VarChar
-  title     String    @db.VarChar(50)
-  body      String    @db.VarChar
-  image     String?   @db.VarChar
+  id         String    @id @unique @default(uuid()) @db.VarChar
+  title      String    @db.VarChar(50)
+  body       String    @db.VarChar
+  image      String?   @db.VarChar
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
-  published Boolean   @default(false)
-  author    User      @relation(fields: [userID], references: [id])
-  userID    String    @db.VarChar
+  published  Boolean   @default(false)
+  author     User      @relation(fields: [userID], references: [id])
+  userID     String    @db.VarChar
 
   @@map("posts")
 }
 
 model User {
-  id        String    @id @unique @default(uuid()) @db.VarChar
-  username  String?   @unique @db.VarChar
-  email     String    @unique @db.VarChar
-  firstname String?   @db.VarChar
-  lastname  String?   @db.VarChar
-  posts     Post[]
-  comments  Comment[]
+  id               String         @id @unique @default(uuid()) @db.VarChar
+  username         String?        @unique @db.VarChar
+  email            String         @unique @db.VarChar
+  firstname        String?        @db.VarChar
+  lastname         String?        @db.VarChar
+  posts            Post[]
+  comments         Comment[]
+  conversations    Conversation[]
+  sentMessages     Message[]      @relation("sender")
+  receivedMessages Message[]      @relation("receiver")
 
   @@map("users")
+}
+
+model Conversation {
+  id         String    @id @default(uuid())
+  name       String?
+  senderId   String
+  receiverId String
+  users      User[]
+  messages   Message[]
+  createdAt  DateTime  @default(now())
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  body           String?
+  sender         User         @relation(name: "sender", fields: [senderId], references: [id])
+  senderId       String
+  receiver       User         @relation(name: "receiver", fields: [receiverId], references: [id])
+  receiverId     String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  conversationId String
+
+  @@map("messages")
 }
