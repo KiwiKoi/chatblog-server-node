@@ -28,10 +28,10 @@ export function getCommentById() {
 
 export function createComment() {
   return async (req: Request, res: Response) => {
-    const { body, created_at, userID, postID } = req.body;
+    const { body, created_at, user_id, postID } = req.body;
 
     const result = await prisma.comment.create({
-      data: { body, created_at, userID, postID },
+      data: { body, created_at, user_id, postID },
     });
     res.json(result);
   };

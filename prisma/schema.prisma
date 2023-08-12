@@ -13,8 +13,8 @@ model Comment {
   body       String    @db.VarChar
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
-  author     User      @relation(fields: [userID], references: [id])
-  userID     String    @db.VarChar
+  author     User      @relation(fields: [user_id], references: [id])
+  user_id     String    @db.VarChar
   postID     String    @db.VarChar
 
   @@map("comments")
@@ -25,11 +25,11 @@ model Post {
   title      String    @db.VarChar(50)
   body       String    @db.VarChar
   image      String?   @db.VarChar
-  created_at DateTime  @default(now())
-  updated_at DateTime? @updatedAt
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
   published  Boolean   @default(false)
-  author     User      @relation(fields: [userID], references: [id])
-  userID     String    @db.VarChar
+  author     User      @relation(fields: [user_id], references: [id])
+  user_id     String    @db.VarChar
 
   @@map("posts")
 }

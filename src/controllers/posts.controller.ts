@@ -17,7 +17,7 @@ export function getPosts() {
       : {};
 
     const posts = await prisma.post.findMany({
-      orderBy: { updated_at: orderBy as Prisma.SortOrder },
+      orderBy: { createdAt: orderBy as Prisma.SortOrder, updatedAt: orderBy as Prisma.SortOrder },
       include: { author: true },
     });
     res.json(posts);
@@ -38,7 +38,7 @@ export function getPostById() {
 export function createPost() {
   return async (req: Request, res: Response) => {
     const postData = req.body;
-    const authorId = req.query.userID;
+    const authorId = req.query.user_id;
 
     console.log(req.params);
     const post = await prisma.post.create({
