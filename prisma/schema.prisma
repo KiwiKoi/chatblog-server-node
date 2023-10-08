@@ -11,8 +11,8 @@ datasource db {
 model Comment {
   id         String    @id @unique @default(uuid()) @db.VarChar
   body       String    @db.VarChar
-  created_at DateTime  @default(now())
-  updated_at DateTime? @updatedAt
+  created_at DateTime  @default(now()) @map("created_at")
+  updated_at DateTime? @updatedAt @map("updated_at")
   author     User      @relation(fields: [user_id], references: [id])
   user_id     String    @db.VarChar
   postID     String    @db.VarChar
