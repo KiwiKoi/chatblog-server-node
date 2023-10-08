@@ -3,11 +3,12 @@ import {Request, Response} from "express";
 
 const prisma = new PrismaClient();
 
-export function getComments() {
+export function getCommentsByPostId() {
     return async (req: Request, res: Response) => {
-        const {orderBy, postID} = req.query;
+        console.log(req.params)
+        const { postID} = req.params;
         const comments = await prisma.comment.findMany({
-            orderBy: {created_at: orderBy as Prisma.SortOrder},
+            orderBy: {created_at: 'desc' as Prisma.SortOrder},
             where: {postID: String(postID)},
             include: {author: true},
         });
