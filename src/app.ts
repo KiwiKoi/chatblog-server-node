@@ -6,8 +6,7 @@ import http from "http";
 import {
   createComment,
   deleteComment,
-  getCommentById,
-  getComments,
+  getCommentsByPostId,
 } from "./controllers/comments.controller";
 import {
   createPost,
@@ -103,8 +102,7 @@ app.post(`/users`, createUser());
 app.put(`/users/:id`, updateUser());
 app.delete(`/users/:id`, deleteUser());
 
-app.get("/comments", getComments());
-app.get("/comments/:id", getCommentById());
+app.get("/comments/:postID", getCommentsByPostId());
 app.post(`/comments`, createComment());
 app.delete(`/comments/:id`, deleteComment());
 
