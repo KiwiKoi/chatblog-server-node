@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-arm64-openssl-1.1.x"]
 }
 
 datasource db {
@@ -14,22 +15,22 @@ model Comment {
   created_at DateTime  @default(now()) @map("created_at")
   updated_at DateTime? @updatedAt @map("updated_at")
   author     User      @relation(fields: [user_id], references: [id])
-  user_id     String    @db.VarChar
+  user_id    String    @db.VarChar
   postID     String    @db.VarChar
 
   @@map("comments")
 }
 
 model Post {
-  id         String    @id @unique @default(uuid()) @db.VarChar
-  title      String    @db.VarChar(50)
-  body       String    @db.VarChar
-  image      String?   @db.VarChar
+  id        String    @id @unique @default(uuid()) @db.VarChar
+  title     String    @db.VarChar(50)
+  body      String    @db.VarChar
+  image     String?   @db.VarChar
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
-  published  Boolean   @default(false)
-  author     User      @relation(fields: [user_id], references: [id])
-  user_id     String    @db.VarChar
+  published Boolean   @default(false)
+  author    User      @relation(fields: [user_id], references: [id])
+  user_id   String    @db.VarChar
 
   @@map("posts")
 }
